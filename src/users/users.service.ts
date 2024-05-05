@@ -48,6 +48,14 @@ export class UsersService {
     return user;
   }
 
+  async findByUsername(username: string): Promise<UsersEntity | null> {
+    const user = await this.usersRepository.findOne({ where: { username } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+
   async update(
     id: number,
     updateUserDto: UpdateUserDto,
