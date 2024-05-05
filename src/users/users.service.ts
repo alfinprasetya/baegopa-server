@@ -1,31 +1,75 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UsersEntity } from './entities/users.entity';
+import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return (
-      'This action adds a new users with data: ' + Object.entries(createUserDto)
-    );
+  @InjectRepository(UsersEntity)
+  private readonly usersRepository: Repository<UsersEntity>;
+
+  async create(createUserDto: CreateUserDto): Promise<UsersEntity> {
+    if (
+      await this.usersRepository.findOne({
+        where: { phone: createUserDto.phone },
+      })
+    ) {
+      throw new BadRequestException('Phone already registered');
+    }
+    if (
+      await this.usersRepository.findOne({
+        where: { username: createUserDto.username },
+      })
+    ) {
+      throw new BadRequestException('Username already exists');
+    }
+    const newUser = this.usersRepository.create(createUserDto);
+    newUser.password = await bcrypt.hash(newUser.password, 10);
+
+    return this.usersRepository.save(newUser);
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll(): Promise<UsersEntity[]> {
+    return this.usersRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} users`;
+  async findOne(id: number): Promise<UsersEntity | null> {
+    const user = await this.usersRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return (
-      `This action updates a #${id} users with data: ` +
-      Object.entries(updateUserDto)
-    );
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+  ): Promise<UsersEntity | null> {
+    const user = await this.usersRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (updateUserDto.password) {
+      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+    }
+    await this.usersRepository.update(id, updateUserDto);
+    return this.usersRepository.findOne({ where: { id } });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} users`;
+  async remove(id: number): Promise<string> {
+    const user = await this.usersRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    await this.usersRepository.delete(id);
+    return 'User deleted successfully';
   }
 }
