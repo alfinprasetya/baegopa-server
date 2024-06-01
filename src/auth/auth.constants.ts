@@ -1,4 +1,0 @@
-export const jwtConstants = {
-  secret:
-    'TESTING VALUE FOR JWT SECRET. DO NOT USE IN PRODUCTION. USE ENVIRONMENT VARIABLE JWT_SECRET',
-};
