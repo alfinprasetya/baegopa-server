@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { join } from 'path';
 import { AuthModule } from 'src/auth/auth.module';
 import { UsersEntity } from 'src/users/entities/users.entity';
 import { UsersModule } from 'src/users/users.module';
@@ -24,6 +26,9 @@ import { UsersModule } from 'src/users/users.module';
         entities: [UsersEntity],
         synchronize: configService.get<boolean>('DB_SYNCHRONIZE'),
       }),
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', '..', 'public'),
     }),
     UsersModule,
     AuthModule,
