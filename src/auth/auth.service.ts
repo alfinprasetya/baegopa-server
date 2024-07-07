@@ -2,6 +2,8 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
+import { CreateUserDto } from '../users/dto/create-user.dto';
+import { UsersEntity } from 'src/users/entities/users.entity';
 
 @Injectable()
 export class AuthService {
@@ -22,5 +24,9 @@ export class AuthService {
     return {
       access_token: await this.jwtService.signAsync(payload),
     };
+  }
+
+  async register(req: CreateUserDto): Promise<UsersEntity> {
+    return this.usersService.create(req);
   }
 }
