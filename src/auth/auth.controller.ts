@@ -10,7 +10,7 @@ import { AuthService } from './auth.service';
 import { SignInDto } from './dto/sign-in.dto';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 
-@Controller('auth')
+@Controller('api/auth')
 export class AuthController {
   @Inject()
   private authService: AuthService;
