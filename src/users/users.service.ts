@@ -90,7 +90,7 @@ export class UsersService {
     try {
       await this.create(user);
     } catch (error) {
-      console.log(`Error seeding menu: ${user.username}`);
+      console.log(`Error seeding user: ${user.username}`);
     }
 
     console.log('User seeded successfully');
