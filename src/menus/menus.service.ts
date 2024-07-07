@@ -8,6 +8,7 @@ import { UpdateMenuDto } from './dto/update-menu.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Menu } from './entities/menu.entity';
 import { Repository } from 'typeorm';
+import { menuList } from './utils/menu.data';
 
 @Injectable()
 export class MenusService {
@@ -49,5 +50,20 @@ export class MenusService {
     await this.findOne(id);
     await this.menuRepository.delete(id);
     return 'Menu deleted successfully';
+  }
+
+  async seedMenus() {
+    const menus = menuList;
+
+    for (const menu of menus) {
+      try {
+        await this.create(menu);
+      } catch (error) {
+        console.error(`Error seeding menu: ${menu.name}`);
+        continue;
+      }
+    }
+
+    console.log('Menu seeded successfully');
   }
 }

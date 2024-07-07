@@ -5,7 +5,7 @@ import {
   IsString,
   MaxLength,
 } from 'class-validator';
-import { MenuCategory } from '../enum/menu.category';
+import { MenuCategory } from '../utils/enum/menu.category';
 
 export class CreateMenuDto {
   @IsString()

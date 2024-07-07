@@ -1,5 +1,5 @@
 import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { MenuCategory } from '../enum/menu.category';
+import { MenuCategory } from '../utils/enum/menu.category';
 
 @Entity('menus')
 export class Menu {
