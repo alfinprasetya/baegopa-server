@@ -9,6 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UsersEntity } from './entities/users.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { Role } from './utils/enum/users.role';
 
 @Injectable()
 export class UsersService {
@@ -82,15 +83,28 @@ export class UsersService {
   }
 
   async seedUser() {
+    const admin = new CreateUserDto();
+    admin.username = 'alfin';
+    admin.password = '123456';
+    admin.phone = '085859332868';
+
+    try {
+      const savedUser = await this.create(admin);
+      savedUser.role = Role.ADMIN;
+      this.usersRepository.update(savedUser.id, savedUser);
+    } catch (error) {
+      console.log(`Error seeding user: ${admin.username}`);
+    }
+
     const user = new CreateUserDto();
-    user.username = 'alfin';
+    user.username = 'user';
     user.password = '123456';
-    user.phone = '085859332868';
+    user.phone = '085555555555';
 
     try {
       await this.create(user);
     } catch (error) {
-      console.log(`Error seeding user: ${user.username}`);
+      console.log(`Error seeding user: ${admin.username}`);
     }
 
     console.log('User seeded successfully');

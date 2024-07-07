@@ -8,9 +8,10 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { UsersService } from 'src/users/users.service';
+import { Role } from 'src/users/utils/enum/users.role';
 
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class AdminGuard implements CanActivate {
   constructor(
     private jwtService: JwtService,
     private configService: ConfigService,
@@ -28,9 +29,14 @@ export class AuthGuard implements CanActivate {
         secret: this.configService.get<string>('JWT_SECRET'),
       });
 
-      request['user'] = await this.userService.findOne(payload.id);
+      const user = await this.userService.findOne(payload.id);
+      if (!user || user.role !== Role.ADMIN) {
+        throw new UnauthorizedException('You are not admin');
+      }
+
+      request['user'] = user;
     } catch {
-      throw new UnauthorizedException('You are not logged in');
+      throw new UnauthorizedException('You are not admin');
     }
     return true;
   }
