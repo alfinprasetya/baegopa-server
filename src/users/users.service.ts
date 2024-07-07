@@ -80,4 +80,19 @@ export class UsersService {
     await this.usersRepository.delete(id);
     return 'User deleted successfully';
   }
+
+  async seedUser() {
+    const user = new CreateUserDto();
+    user.username = 'alfin';
+    user.password = '123456';
+    user.phone = '085859332868';
+
+    try {
+      await this.create(user);
+    } catch (error) {
+      console.log(`Error seeding menu: ${user.username}`);
+    }
+
+    console.log('User seeded successfully');
+  }
 }
