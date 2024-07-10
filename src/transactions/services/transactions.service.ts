@@ -10,6 +10,7 @@ import { TransactionDetailsService } from './transaction-details.service';
 import { plainToInstance } from 'class-transformer';
 import { User } from 'src/users/entities/users.entity';
 import generateRandomTransaction from '../utils/transactions.seed';
+import { QueryTransactionDto } from '../dto/query-transaction.dto';
 
 @Injectable()
 export class TransactionsService {
@@ -45,9 +46,16 @@ export class TransactionsService {
     return await this.findOne(savedTransaction.id);
   }
 
-  async findAll() {
+  async findAll(query: QueryTransactionDto) {
+    const user = query.user ? { id: query.user } : {};
+    const page = query.page ? query.page : 1;
+    const max = query.max ? query.max : 10;
+
     const transactions = await this.repo.find({
+      where: { user: user },
       relations: { user: true, items: { menu: true } },
+      take: max,
+      skip: max * (page - 1),
     });
 
     transactions.map((t) => (t.user = plainToInstance(User, t.user)));
