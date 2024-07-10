@@ -6,17 +6,18 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UsersEntity } from './entities/users.entity';
+import { User } from './entities/users.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Role } from './utils/enum/users.role';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class UsersService {
-  @InjectRepository(UsersEntity)
-  private readonly usersRepository: Repository<UsersEntity>;
+  @InjectRepository(User)
+  private readonly usersRepository: Repository<User>;
 
-  async create(createUserDto: CreateUserDto): Promise<UsersEntity> {
+  async create(createUserDto: CreateUserDto): Promise<User> {
     if (
       await this.usersRepository.findOne({
         where: { phone: createUserDto.phone },
@@ -34,33 +35,23 @@ export class UsersService {
     const newUser = this.usersRepository.create(createUserDto);
     newUser.password = await bcrypt.hash(newUser.password, 10);
 
-    return this.usersRepository.save(newUser);
+    return plainToInstance(User, await this.usersRepository.save(newUser));
   }
 
-  async findAll(): Promise<UsersEntity[]> {
-    return this.usersRepository.find();
+  async findAll(): Promise<User[]> {
+    const users = await this.usersRepository.find();
+    return users.map((user) => plainToInstance(User, user));
   }
 
-  async findOne(id: number): Promise<UsersEntity | null> {
+  async findOne(id: number) {
     const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    return user;
+    return plainToInstance(User, user);
   }
 
-  async findByUsername(username: string): Promise<UsersEntity | null> {
-    const user = await this.usersRepository.findOne({ where: { username } });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    return user;
-  }
-
-  async update(
-    id: number,
-    updateUserDto: UpdateUserDto,
-  ): Promise<UsersEntity | null> {
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<User | null> {
     const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException('User not found');
@@ -70,7 +61,10 @@ export class UsersService {
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
     }
     await this.usersRepository.update(id, updateUserDto);
-    return this.usersRepository.findOne({ where: { id } });
+    return plainToInstance(
+      User,
+      await this.usersRepository.findOne({ where: { id } }),
+    );
   }
 
   async remove(id: number): Promise<string> {
@@ -80,6 +74,14 @@ export class UsersService {
     }
     await this.usersRepository.delete(id);
     return 'User deleted successfully';
+  }
+
+  async findByUsername(username: string) {
+    const user = await this.usersRepository.findOne({ where: { username } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 
   async seedUser() {

@@ -6,7 +6,10 @@ import { join } from 'path';
 import { AuthModule } from 'src/auth/auth.module';
 import { Menu } from 'src/menus/entities/menu.entity';
 import { MenusModule } from 'src/menus/menus.module';
-import { UsersEntity } from 'src/users/entities/users.entity';
+import { TransactionDetail } from 'src/transactions/entities/transaction-detail.entity';
+import { TransactionEntity } from 'src/transactions/entities/transaction.entity';
+import { TransactionsModule } from 'src/transactions/transactions.module';
+import { User } from 'src/users/entities/users.entity';
 import { UsersModule } from 'src/users/users.module';
 
 @Module({
@@ -25,7 +28,7 @@ import { UsersModule } from 'src/users/users.module';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
-        entities: [UsersEntity, Menu],
+        entities: [User, Menu, TransactionEntity, TransactionDetail],
         synchronize: configService.get<boolean>('DB_SYNCHRONIZE'),
       }),
     }),
@@ -36,6 +39,7 @@ import { UsersModule } from 'src/users/users.module';
     UsersModule,
     AuthModule,
     MenusModule,
+    TransactionsModule,
   ],
   controllers: [],
   providers: [],
