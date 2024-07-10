@@ -26,9 +26,9 @@ export class TransactionsService {
   @Inject()
   private readonly tDetailService: TransactionDetailsService;
 
-  async create(req: CreateTransactionDto) {
+  async create(user: User, req: CreateTransactionDto) {
     const transaction = new TransactionEntity();
-    transaction.user = await this.usersService.findOne(req.user_id);
+    transaction.user = user;
     transaction.type = req.type;
     transaction.date = new Date();
     const savedTransaction = await this.repo.save(transaction);
@@ -78,8 +78,9 @@ export class TransactionsService {
     return transaction;
   }
 
-  remove(id: number) {
-    this.repo.delete({ id });
+  async remove(id: number) {
+    await this.tDetailService.removeByTransactionId(id);
+    await this.repo.delete({ id });
   }
 
   async seedTransactions() {
@@ -87,17 +88,29 @@ export class TransactionsService {
     if (count >= 20) {
       return;
     }
-    const user1 = Array.from({ length: 10 }, () =>
-      generateRandomTransaction(1),
+    const user1transactions = Array.from(
+      { length: 10 },
+      generateRandomTransaction,
     );
-    const user2 = Array.from({ length: 10 }, () =>
-      generateRandomTransaction(2),
+    const user2transactions = Array.from(
+      { length: 10 },
+      generateRandomTransaction,
     );
-    const transactions = user1.concat(user2);
 
-    for (const t of transactions) {
+    const user1 = await this.usersService.findOne(1);
+    for (const t of user1transactions) {
       try {
-        const trans = await this.create(t);
+        const trans = await this.create(user1, t);
+        await this.repo.update(trans.id, { completed: true });
+      } catch (error) {
+        continue;
+      }
+    }
+
+    const user2 = await this.usersService.findOne(2);
+    for (const t of user2transactions) {
+      try {
+        const trans = await this.create(user2, t);
         await this.repo.update(trans.id, { completed: true });
       } catch (error) {
         continue;

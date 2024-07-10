@@ -21,10 +21,6 @@ class ItemDto {
 }
 
 export class CreateTransactionDto {
-  @IsInt()
-  @IsNotEmpty()
-  user_id: number;
-
   @IsNotEmpty()
   @IsEnum(TransactionType)
   type: TransactionType;

@@ -12,4 +12,14 @@ export class TransactionDetailsService {
     const transactionDetail = this.repo.create(req);
     return this.repo.save(transactionDetail);
   }
+
+  async removeByTransactionId(id: number) {
+    const transactionDetails = await this.repo.find({
+      where: { transaction: { id } },
+    });
+
+    if (transactionDetails.length > 0) {
+      await this.repo.remove(transactionDetails);
+    }
+  }
 }
