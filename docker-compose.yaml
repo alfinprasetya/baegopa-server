@@ -1,0 +1,28 @@
+services:
+  sqlserver:
+    image: mysql
+    container_name: sqlserver
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+    ports:
+      - '3306:3306'
+    networks:
+      - baegopa_network
+
+  app:
+    image: baegopa:1.0
+    container_name: baegopa-app
+    command: npm run start:prod
+    ports:
+      - '3000:3000'
+    depends_on:
+      - sqlserver
+    env_file:
+      - .env
+    networks:
+      - baegopa_network
+
+networks:
+  baegopa_network:
+    name: baegopa_network
