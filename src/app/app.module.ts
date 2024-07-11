@@ -33,7 +33,7 @@ import { UsersModule } from 'src/users/users.module';
       }),
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', '..', 'public'),
+      rootPath: join(__dirname, '..', 'public'),
       exclude: ['/api/(.*)'],
     }),
     UsersModule,
